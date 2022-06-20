@@ -148,7 +148,8 @@ class TestSubscription:
             )
 
     @pytest.mark.parametrize(
-        "retry_policy_param", ["retry_policy", 10, True],
+        "retry_policy_param",
+        ["retry_policy", 10, True],
     )
     def test_raises_error_when_retry_policy_is_not_valid(self, retry_policy_param):
         with pytest.raises(ValueError):

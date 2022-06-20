@@ -4,9 +4,9 @@ import time
 from collections.abc import Iterable
 from inspect import getfullargspec, getmodule
 
+from django.conf import settings
 from google.protobuf import duration_pb2
 from google.pubsub_v1.types import RetryPolicy
-
 
 from .middleware import run_middleware_hook
 
@@ -74,6 +74,8 @@ class Subscription:
         return None
 
     def _init_retry_policy(self, retry_policy: dict):
+        retry_policy = retry_policy or settings.RELE.get("RETRY_POLICY")
+
         if not retry_policy:
             return
 
