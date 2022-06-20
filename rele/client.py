@@ -51,8 +51,7 @@ class Subscriber:
         have a topic to subscribe to. Which means that the topic must be
         created manually before the worker is started.
 
-        :param subscription: str Subscription name
-        :param topic: str Topic name to subscribe
+        :param subscription: obj :class:`~rele.subscription.Subscription`.
         """
         subscription_path = self._client.subscription_path(
             self._gc_project_id, subscription.name
@@ -84,6 +83,9 @@ class Subscriber:
 
         if subscription.backend_filter_by:
             request["filter"] = subscription.backend_filter_by
+
+        if subscription.retry_policy:
+            request["retry_policy"] = subscription.retry_policy
 
         self._client.create_subscription(request=request)
 

@@ -4,6 +4,10 @@ import time
 from collections.abc import Iterable
 from inspect import getfullargspec, getmodule
 
+from google.protobuf import duration_pb2
+from google.pubsub_v1.types import RetryPolicy
+
+
 from .middleware import run_middleware_hook
 
 logger = logging.getLogger(__name__)
@@ -35,7 +39,14 @@ class Subscription:
     """
 
     def __init__(
-        self, func, topic, prefix="", suffix="", filter_by=None, backend_filter_by=None
+        self,
+        func,
+        topic,
+        prefix="",
+        suffix="",
+        filter_by=None,
+        backend_filter_by=None,
+        retry_policy=None,
     ):
         self._func = func
         self.topic = topic
@@ -43,6 +54,7 @@ class Subscription:
         self._suffix = suffix
         self._filters = self._init_filters(filter_by)
         self.backend_filter_by = backend_filter_by
+        self.retry_policy = self._init_retry_policy(retry_policy)
 
     def _init_filters(self, filter_by):
         if filter_by and not (
@@ -60,6 +72,21 @@ class Subscription:
             return [filter_by]
 
         return None
+
+    def _init_retry_policy(self, retry_policy: dict):
+        if not retry_policy:
+            return
+
+        if isinstance(retry_policy, dict):
+            return RetryPolicy(
+                minimum_backoff=duration_pb2.Duration(
+                    seconds=retry_policy.get("minimum_backoff")
+                ),
+                maximum_backoff=duration_pb2.Duration(
+                    seconds=retry_policy.get("maximum_backoff")
+                ),
+            )
+        raise ValueError("Wrong retry_policy type. Must be a dictionary.")
 
     @property
     def name(self):
@@ -145,7 +172,14 @@ class Callback:
             run_middleware_hook("post_process_message")
 
 
-def sub(topic, prefix=None, suffix=None, filter_by=None, backend_filter_by=None):
+def sub(
+    topic,
+    prefix=None,
+    suffix=None,
+    filter_by=None,
+    backend_filter_by=None,
+    retry_policy=None,
+):
     """Decorator function that makes declaring a PubSub Subscription simple.
 
     The Subscriber returned will automatically create and name
@@ -190,6 +224,12 @@ def sub(topic, prefix=None, suffix=None, filter_by=None, backend_filter_by=None)
     :param filter_by: Union[function, list] An optional function or tuple of
                       functions that filters the messages to be processed by
                       the sub regarding their attributes.
+    :param retry_policy: An optional dictionary to define the policy that specifies
+                        how Cloud Pub/Sub retries message delivery. It has two keys;
+                        minimum_backoff: Value should be between 0 and 600 seconds.
+                            Defaults to 10 seconds.
+                        maximum_backoff: Value should be between 0 and 600 seconds.
+                            Defaults to 600 seconds.
     :return: :class:`~rele.subscription.Subscription`
     """
 
@@ -214,6 +254,7 @@ def sub(topic, prefix=None, suffix=None, filter_by=None, backend_filter_by=None)
             suffix=suffix,
             filter_by=filter_by,
             backend_filter_by=backend_filter_by,
+            retry_policy=retry_policy,
         )
 
     return decorator
