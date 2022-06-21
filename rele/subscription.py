@@ -5,8 +5,6 @@ from collections.abc import Iterable
 from inspect import getfullargspec, getmodule
 
 from django.conf import settings
-from google.protobuf import duration_pb2
-from google.pubsub_v1.types import RetryPolicy
 
 from .middleware import run_middleware_hook
 
@@ -54,7 +52,7 @@ class Subscription:
         self._suffix = suffix
         self._filters = self._init_filters(filter_by)
         self.backend_filter_by = backend_filter_by
-        self.retry_policy = self._init_retry_policy(retry_policy)
+        self.retry_policy = self.validate_retry_policy(retry_policy)
 
     def _init_filters(self, filter_by):
         if filter_by and not (
@@ -73,22 +71,10 @@ class Subscription:
 
         return None
 
-    def _init_retry_policy(self, retry_policy: dict):
-        retry_policy = retry_policy or settings.RELE.get("RETRY_POLICY")
-
-        if not retry_policy:
-            return
-
-        if isinstance(retry_policy, dict):
-            return RetryPolicy(
-                minimum_backoff=duration_pb2.Duration(
-                    seconds=retry_policy.get("minimum_backoff")
-                ),
-                maximum_backoff=duration_pb2.Duration(
-                    seconds=retry_policy.get("maximum_backoff")
-                ),
-            )
-        raise ValueError("Wrong retry_policy type. Must be a dictionary.")
+    def validate_retry_policy(self, retry_policy):
+        if retry_policy and not isinstance(retry_policy, dict):
+            raise ValueError("Wrong retry_policy type. Must be a dictionary.")
+        return retry_policy
 
     @property
     def name(self):

@@ -123,5 +123,5 @@ class TestCreateAndRun:
         subscriptions = (sub_stub,)
         create_and_run(subscriptions, config)
 
-        mock_worker.assert_called_with(subscriptions, "rele-test", ANY, 60, 2)
+        mock_worker.assert_called_with(subscriptions, "rele-test", ANY, 60, 2, None)
         mock_worker.return_value.run_forever.assert_called_once_with()

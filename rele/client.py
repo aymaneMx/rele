@@ -8,6 +8,8 @@ from contextlib import suppress
 import google.auth
 from google.api_core import exceptions
 from google.cloud import pubsub_v1
+from google.protobuf import duration_pb2
+from google.pubsub_v1.types import RetryPolicy
 
 from rele.middleware import run_middleware_hook
 
@@ -35,13 +37,21 @@ class Subscriber:
     :param gc_project_id: str :ref:`settings_project_id` .
     :param credentials: obj :meth:`~rele.config.Config.credentials`.
     :param default_ack_deadline: int Ack Deadline defined in settings
+    :param default_retry_policy: dict Retry Policy defined in settings
     """
 
-    def __init__(self, gc_project_id, credentials, default_ack_deadline=None):
-        self._gc_project_id = gc_project_id
+    def __init__(
+        self,
+        gc_project_id,
+        credentials,
+        default_ack_deadline=None,
+        default_retry_policy=None,
+    ):
         self._ack_deadline = default_ack_deadline or DEFAULT_ACK_DEADLINE
-        self.credentials = credentials if not USE_EMULATOR else None
         self._client = pubsub_v1.SubscriberClient(credentials=credentials)
+        self._gc_project_id = gc_project_id
+        self._retry_policy = default_retry_policy
+        self.credentials = credentials if not USE_EMULATOR else None
 
     def create_subscription(self, subscription):
         """Handles creating the subscription when it does not exists.
@@ -84,8 +94,16 @@ class Subscriber:
         if subscription.backend_filter_by:
             request["filter"] = subscription.backend_filter_by
 
-        if subscription.retry_policy:
-            request["retry_policy"] = subscription.retry_policy
+        retry_policy = subscription.retry_policy or self._retry_policy
+        if retry_policy:
+            request["retry_policy"] = RetryPolicy(
+                minimum_backoff=duration_pb2.Duration(
+                    seconds=retry_policy.get("minimum_backoff")
+                ),
+                maximum_backoff=duration_pb2.Duration(
+                    seconds=retry_policy.get("maximum_backoff")
+                ),
+            )
 
         self._client.create_subscription(request=request)
 

@@ -67,11 +67,8 @@ class TestSubscription:
         assert isinstance(sub_with_exponential_retries, Subscription)
         assert sub_with_exponential_retries.topic == "some-cool-topic"
         assert sub_with_exponential_retries.name == "some-cool-topic"
-        assert isinstance(
-            sub_with_exponential_retries.retry_policy, pubsub_v1.types.RetryPolicy
-        )
-        assert sub_with_exponential_retries.retry_policy.minimum_backoff.seconds == 10
-        assert sub_with_exponential_retries.retry_policy.maximum_backoff.seconds == 50
+        assert sub_with_exponential_retries.retry_policy.get("minimum_backoff") == 10
+        assert sub_with_exponential_retries.retry_policy.get("maximum_backoff") == 50
 
     def test_subs_without_prefix_return_subscription_objects(self):
         assert isinstance(sub_fancy_stub, Subscription)

@@ -77,7 +77,7 @@ In an app directory, we create our sub function within our ``subs.py`` file.
     @sub(topic='photo-uploaded')
     def photo_uploaded(data, **kwargs):
         print(f"Customer {data['customer_id']} has uploaded an image to our service,
-                and we stored it at {data['location'}.")
+                and we stored it at {data['location']}.")
 
 Additionally, if you added message attributes to your Message, you can access them via the
 ``kwargs`` argument:
@@ -87,7 +87,7 @@ Additionally, if you added message attributes to your Message, you can access th
     @sub(topic='photo-uploaded')
     def photo_uploaded(data, **kwargs):
         print(f"Customer {data['customer_id']} has uploaded an image to our service,
-                and we stored it at {data['location'}.
+                and we stored it at {data['location']}.
                 It is a {kwargs['type']} picture with the
                 rotation {kwargs['rotation']}")
 
@@ -104,7 +104,7 @@ To access this attribute you can use ``kwargs``.
     @sub(topic='photo-uploaded')
     def photo_uploaded(data, **kwargs):
         print(f"Customer {data['customer_id']} has uploaded an image to our service,
-                and it was published at {kwargs['published_at'}.")
+                and it was published at {kwargs['published_at']}.")
 
 
 .. _consuming:
