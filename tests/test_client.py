@@ -274,10 +274,6 @@ class TestSubscriber:
             f"projects/{project_id}/subscriptions/" f"{project_id}-test-topic"
         )
         expected_topic = f"projects/{project_id}/topics/" f"{project_id}-test-topic"
-        retry_policy = {
-            "minimum_backoff": 10,
-            "maximum_backoff": 50,
-        }
         expected_retry_policy = pubsub_v1.types.RetryPolicy(
             minimum_backoff=duration_pb2.Duration(seconds=10),
             maximum_backoff=duration_pb2.Duration(seconds=50),
@@ -286,7 +282,7 @@ class TestSubscriber:
             Subscription(
                 None,
                 topic=f"{project_id}-test-topic",
-                retry_policy=retry_policy,
+                retry_policy={"minimum_backoff": 10, "maximum_backoff": 50},
             )
         )
 

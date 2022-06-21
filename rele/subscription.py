@@ -4,8 +4,6 @@ import time
 from collections.abc import Iterable
 from inspect import getfullargspec, getmodule
 
-from django.conf import settings
-
 from .middleware import run_middleware_hook
 
 logger = logging.getLogger(__name__)
