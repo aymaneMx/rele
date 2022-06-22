@@ -37,6 +37,8 @@ class Config:
         self.filter_by = setting.get("FILTER_SUBS_BY")
         self._credentials = None
         self.retry_policy = setting.get("DEFAULT_RETRY_POLICY")
+        self.dead_letter_topic_id = setting.get("DEAD_LETTER_TOPIC_ID")
+        self.max_delivery_attempts = setting.get("MAX_DELIVERY_ATTEMPTS", 5)
 
     @property
     def encoder(self):

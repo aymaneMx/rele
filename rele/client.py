@@ -9,7 +9,7 @@ import google.auth
 from google.api_core import exceptions
 from google.cloud import pubsub_v1
 from google.protobuf import duration_pb2
-from google.pubsub_v1.types import RetryPolicy
+from google.pubsub_v1.types import DeadLetterPolicy, RetryPolicy
 
 from rele.middleware import run_middleware_hook
 
@@ -38,6 +38,7 @@ class Subscriber:
     :param credentials: obj :meth:`~rele.config.Config.credentials`.
     :param default_ack_deadline: int Ack Deadline defined in settings
     :param default_retry_policy: dict Retry Policy defined in settings
+    :param default_dead_letter_policy: dict Dead Letter Policy defined in settings
     """
 
     def __init__(
@@ -46,12 +47,14 @@ class Subscriber:
         credentials,
         default_ack_deadline=None,
         default_retry_policy=None,
+        default_dead_letter_policy=None,
     ):
         self._gc_project_id = gc_project_id
         self._ack_deadline = default_ack_deadline or DEFAULT_ACK_DEADLINE
         self.credentials = credentials if not USE_EMULATOR else None
         self._client = pubsub_v1.SubscriberClient(credentials=credentials)
         self._retry_policy = default_retry_policy
+        self._dead_letter_policy = default_dead_letter_policy
 
     def create_subscription(self, subscription):
         """Handles creating the subscription when it does not exists.
@@ -102,6 +105,17 @@ class Subscriber:
                 ),
                 maximum_backoff=duration_pb2.Duration(
                     seconds=retry_policy.get("maximum_backoff")
+                ),
+            )
+        if self._dead_letter_policy:
+            dead_letter_topic_path = self._client.topic_path(
+                self._gc_project_id,
+                self._dead_letter_policy.get("dead_letter_topic_id"),
+            )
+            request["dead_letter_policy"] = DeadLetterPolicy(
+                dead_letter_topic=dead_letter_topic_path,
+                max_delivery_attempts=self._dead_letter_policy.get(
+                    "max_delivery_attempts"
                 ),
             )
 
