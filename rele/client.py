@@ -47,11 +47,11 @@ class Subscriber:
         default_ack_deadline=None,
         default_retry_policy=None,
     ):
-        self._ack_deadline = default_ack_deadline or DEFAULT_ACK_DEADLINE
-        self._client = pubsub_v1.SubscriberClient(credentials=credentials)
         self._gc_project_id = gc_project_id
-        self._retry_policy = default_retry_policy
+        self._ack_deadline = default_ack_deadline or DEFAULT_ACK_DEADLINE
         self.credentials = credentials if not USE_EMULATOR else None
+        self._client = pubsub_v1.SubscriberClient(credentials=credentials)
+        self._retry_policy = default_retry_policy
 
     def create_subscription(self, subscription):
         """Handles creating the subscription when it does not exists.

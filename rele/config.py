@@ -22,21 +22,21 @@ class Config:
     """
 
     def __init__(self, setting):
-        self._credentials = None
-        self._encoder_path = setting.get("ENCODER_PATH", DEFAULT_ENCODER_PATH)
         self._gc_project_id = setting.get("GC_PROJECT_ID")
+        self.gc_credentials_path = setting.get("GC_CREDENTIALS_PATH")
+        self.app_name = setting.get("APP_NAME")
+        self.sub_prefix = setting.get("SUB_PREFIX")
+        self.middleware = setting.get("MIDDLEWARE", default_middleware)
         self.ack_deadline = setting.get(
             "ACK_DEADLINE",
             os.environ.get("DEFAULT_ACK_DEADLINE", DEFAULT_ACK_DEADLINE),
         )
-        self.app_name = setting.get("APP_NAME")
-        self.filter_by = setting.get("FILTER_SUBS_BY")
-        self.gc_credentials_path = setting.get("GC_CREDENTIALS_PATH")
-        self.middleware = setting.get("MIDDLEWARE", default_middleware)
+        self._encoder_path = setting.get("ENCODER_PATH", DEFAULT_ENCODER_PATH)
         self.publisher_timeout = setting.get("PUBLISHER_TIMEOUT", 3.0)
-        self.retry_policy = setting.get("DEFAULT_RETRY_POLICY")
-        self.sub_prefix = setting.get("SUB_PREFIX")
         self.threads_per_subscription = setting.get("THREADS_PER_SUBSCRIPTION", 2)
+        self.filter_by = setting.get("FILTER_SUBS_BY")
+        self._credentials = None
+        self.retry_policy = setting.get("DEFAULT_RETRY_POLICY")
 
     @property
     def encoder(self):
