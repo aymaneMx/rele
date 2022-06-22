@@ -34,6 +34,8 @@ Example::
             'minimum_backoff': 10,
             'maximum_backoff': 60,
         },
+        'DEAD_LETTER_TOPIC_ID': 'dead-letter-topic',
+        'MAX_DELIVERY_ATTEMPTS': 5,
     }
 
 ``GC_PROJECT_ID``
@@ -174,3 +176,23 @@ For more information, please see `Filtering Messages section <https://mercadonar
 Dictionary with two keys: `minimum_backoff` and `maximum_backoff`, that specifies how Pub/Sub retries message delivery for all the subscriptions.
 
     If not set, the default retry policy is applied. This generally implies that messages will be retried as soon as possible for healthy subscribers. RetryPolicy will be triggered on NACKs or acknowledgement deadline exceeded events for a given message.
+
+
+``DEAD_LETTER_TOPIC_ID``
+----------------------------
+
+**Optional**
+
+String defines the name of the topic to which dead letter messages should be published.
+
+
+``MAX_DELIVERY_ATTEMPTS``
+----------------------------
+
+**Optional**
+
+Default: 5 times
+
+Integer defines the maximum number of delivery attempts for any message.
+Both `DEAD_LETTER_TOPIC_ID` and `MAX_DELIVERY_ATTEMPTS` define the `DeadLetterPolicy`.
+It is essential to note that the `MAX_DELIVERY_ATTEMPTS` is ignored when the `DEAD_LETTER_TOPIC_ID` is not set.
